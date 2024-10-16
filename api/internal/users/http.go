@@ -24,7 +24,7 @@ func NewHTTP(deps *deps.Deps) *HTTP {
 
 // GET /users
 func (h *HTTP) List(_ http.ResponseWriter, r *http.Request) (interface{}, error) {
-	users, err := h.service.List(r, h)
+	users, err := h.service.List(r.Context(), *h.service.deps.DBClient)
 	if err != nil {
 		log.Error(r.Context(), "Failed to list users", log.ErrAttr(err))
 		return nil, err

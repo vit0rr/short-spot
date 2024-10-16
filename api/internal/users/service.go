@@ -7,6 +7,7 @@ import (
 
 	"github.com/vit0rr/short-spot/pkg/deps"
 	"github.com/vit0rr/short-spot/pkg/log"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Service struct {
@@ -19,11 +20,11 @@ func NewService(deps *deps.Deps) *Service {
 	}
 }
 
-func (s *Service) List(r *http.Request, h *HTTP) ([]map[string]interface{}, error) {
-	coll := h.service.deps.DBClient.Database("shortspot").Collection("users")
-	cursor, err := coll.Find(r.Context(), map[string]interface{}{})
+func (s *Service) List(c context.Context, dbclient mongo.Client) ([]map[string]interface{}, error) {
+	coll := dbclient.Database("shortspot").Collection("users")
+	cursor, err := coll.Find(c, map[string]interface{}{})
 	if err != nil {
-		log.Error(r.Context(), "Failed to fetch users from database", log.ErrAttr(err))
+		log.Error(c, "Failed to fetch users from database", log.ErrAttr(err))
 		return nil, err
 	}
 
@@ -32,7 +33,7 @@ func (s *Service) List(r *http.Request, h *HTTP) ([]map[string]interface{}, erro
 		var user map[string]interface{}
 		err := cursor.Decode(&user)
 		if err != nil {
-			log.Error(r.Context(), "Failed to decode user", log.ErrAttr(err))
+			log.Error(c, "Failed to decode user", log.ErrAttr(err))
 			return nil, err
 		}
 

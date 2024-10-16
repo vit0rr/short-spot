@@ -3,10 +3,11 @@ package users
 import (
 	"context"
 	"encoding/json"
-	"net/http"
+	"io"
 
 	"github.com/vit0rr/short-spot/pkg/deps"
 	"github.com/vit0rr/short-spot/pkg/log"
+	"go.mongodb.org/mongo-driver/bson"
 	"go.mongodb.org/mongo-driver/mongo"
 )
 
@@ -20,45 +21,39 @@ func NewService(deps *deps.Deps) *Service {
 	}
 }
 
-func (s *Service) List(c context.Context, dbclient mongo.Client) ([]map[string]interface{}, error) {
+func (s *Service) List(c context.Context, dbclient mongo.Client) ([]User, error) {
 	coll := dbclient.Database("shortspot").Collection("users")
-	cursor, err := coll.Find(c, map[string]interface{}{})
+	cursor, err := coll.Find(c, bson.M{})
 	if err != nil {
 		log.Error(c, "Failed to fetch users from database", log.ErrAttr(err))
 		return nil, err
 	}
 
-	var users []map[string]interface{}
-	for cursor.Next(context.Background()) {
-		var user map[string]interface{}
-		err := cursor.Decode(&user)
-		if err != nil {
-			log.Error(c, "Failed to decode user", log.ErrAttr(err))
-			return nil, err
-		}
-
-		users = append(users, user)
+	var users []User
+	if err := cursor.All(c, &users); err != nil {
+		log.Error(c, "Failed to decode users", log.ErrAttr(err))
+		return nil, err
 	}
 
 	return users, nil
 }
 
 // POST /users/create
-func (s *Service) Create(r *http.Request, h *HTTP) ([]map[string]interface{}, error) {
+func (s *Service) Create(c context.Context, b io.ReadCloser, dbclient mongo.Client) ([]map[string]interface{}, error) {
 	var user User
 
-	err := json.NewDecoder(r.Body).Decode(&user)
+	err := json.NewDecoder(b).Decode(&user)
 	if err != nil {
-		log.Error(r.Context(), "Failed to decode request body", log.ErrAttr(err))
+		log.Error(c, "Failed to decode request body", log.ErrAttr(err))
 		return nil, err
 	}
 
-	defer r.Body.Close()
+	defer b.Close()
 
-	coll := h.service.deps.DBClient.Database("shortspot").Collection("users")
-	result, err := coll.InsertOne(r.Context(), user)
+	coll := dbclient.Database("shortspot").Collection("users")
+	result, err := coll.InsertOne(c, user)
 	if err != nil {
-		log.Error(r.Context(), "Failed to insert user into database", log.ErrAttr(err))
+		log.Error(c, "Failed to insert user into database", log.ErrAttr(err))
 		return nil, err
 	}
 

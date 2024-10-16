@@ -11,11 +11,6 @@ type HTTP struct {
 	service *Service
 }
 
-type User struct {
-	Name  string `json:"name" bson:"name"`
-	Email string `json:"email" bson:"email"`
-}
-
 func NewHTTP(deps *deps.Deps) *HTTP {
 	return &HTTP{
 		service: NewService(deps),
@@ -35,7 +30,8 @@ func (h *HTTP) List(_ http.ResponseWriter, r *http.Request) (interface{}, error)
 
 // POST /users/create
 func (h *HTTP) Create(_ http.ResponseWriter, r *http.Request) (interface{}, error) {
-	success, err := h.service.Create(r, h)
+
+	success, err := h.service.Create(r.Context(), r.Body, *h.service.deps.DBClient)
 	if err != nil {
 		log.Error(r.Context(), "Failed to create user", log.ErrAttr(err))
 		return nil, err

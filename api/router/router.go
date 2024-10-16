@@ -31,6 +31,7 @@ func (router *Router) BuildRoutes() *chi.Mux {
 	r.Route("/", func(r chi.Router) {
 		r.Route("/users", func(r chi.Router) {
 			r.Get("/", telemetry.HandleFuncLogger(router.users.List))
+			r.Post("/create", telemetry.HandleFuncLogger(router.users.Create))
 		})
 	})
 

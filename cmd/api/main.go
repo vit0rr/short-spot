@@ -9,11 +9,12 @@ import (
 	"os"
 	"os/signal"
 
-	"github.com/jackc/pgx/v5/pgxpool"
 	"github.com/vit0rr/short-spot/api/server"
 	"github.com/vit0rr/short-spot/config"
 	"github.com/vit0rr/short-spot/pkg/deps"
 	"github.com/vit0rr/short-spot/pkg/log"
+	"go.mongodb.org/mongo-driver/mongo"
+	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
 func main() {
@@ -42,21 +43,20 @@ func main() {
 	}
 	log.New(ctx, logLevel)
 
-	pgCfg, err := pgxpool.ParseConfig(cfg.API.Postgres.Dsn)
+	mongoClient, err := mongo.Connect(ctx, options.Client().ApplyURI(cfg.API.Mongo.Dsn))
 	if err != nil {
 		log.Error(ctx, "unable to parse database connection", log.ErrAttr(err))
-		os.Exit(1)
+		panic(err)
 	}
 
-	// initialize postgres pool
-	pool, err := pgxpool.NewWithConfig(ctx, pgCfg)
-	if err != nil {
-		log.Error(ctx, "unable to initialize database connection", log.ErrAttr(err))
-		os.Exit(1)
-	}
-	defer pool.Close()
+	defer func() {
+		if err := mongoClient.Disconnect(context.TODO()); err != nil {
+			log.Error(ctx, "unable to disconnect from MongoDB", log.ErrAttr(err))
+			panic(err)
+		}
+	}()
 
-	dependencies := deps.New(cfg, pool)
+	dependencies := deps.New(cfg, mongoClient)
 
 	httpServer := server.New(ctx, dependencies)
 

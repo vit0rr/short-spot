@@ -2,17 +2,17 @@ package config
 
 // API related config
 type API struct {
-	Postgres Postgres `hcl:"postgres,block"`
+	Mongo Mongo `hcl:"mongo,block"`
 }
 
-type Postgres struct {
+type Mongo struct {
 	Dsn string `hcl:"dsn,attr"`
 }
 
 func GetDefaultAPIConfig() API {
 	return API{
-		Postgres: Postgres{
-			Dsn: "host=localhost user=postgres password=postgres dbname=postgres port=5432 sslmode=disable",
+		Mongo: Mongo{
+			Dsn: "mongodb://docker:docker@localhost:27017",
 		},
 	}
 }

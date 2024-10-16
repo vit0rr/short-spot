@@ -1,0 +1,14 @@
+version: '3.8'
+
+services:
+  short-spot-mongo:
+    container_name: short-spot-mongo
+    platform: linux/amd64
+    image: mongo:4.4
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: docker
+      MONGO_INITDB_ROOT_PASSWORD: docker
+    ports:
+      - 27017:27017
+    volumes:
+      - ./data/mongo:/data

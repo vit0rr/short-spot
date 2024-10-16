@@ -2,6 +2,8 @@ package users
 
 import (
 	"context"
+	"encoding/json"
+	"net/http"
 
 	"github.com/vit0rr/short-spot/pkg/deps"
 	"github.com/vit0rr/short-spot/pkg/log"
@@ -17,9 +19,52 @@ func NewService(deps *deps.Deps) *Service {
 	}
 }
 
-func (s *Service) List(ctx context.Context) ([]map[string]interface{}, error) {
-	log.Info(ctx, "Listing users inside the service hurray!!")
+func (s *Service) List(r *http.Request, h *HTTP) ([]map[string]interface{}, error) {
+	coll := h.service.deps.DBClient.Database("shortspot").Collection("users")
+	cursor, err := coll.Find(r.Context(), map[string]interface{}{})
+	if err != nil {
+		log.Error(r.Context(), "Failed to fetch users from database", log.ErrAttr(err))
+		return nil, err
+	}
+
+	var users []map[string]interface{}
+	for cursor.Next(context.Background()) {
+		var user map[string]interface{}
+		err := cursor.Decode(&user)
+		if err != nil {
+			log.Error(r.Context(), "Failed to decode user", log.ErrAttr(err))
+			return nil, err
+		}
+
+		users = append(users, user)
+	}
+
+	return users, nil
+}
+
+// POST /users/create
+func (s *Service) Create(r *http.Request, h *HTTP) ([]map[string]interface{}, error) {
+	var user User
+
+	err := json.NewDecoder(r.Body).Decode(&user)
+	if err != nil {
+		log.Error(r.Context(), "Failed to decode request body", log.ErrAttr(err))
+		return nil, err
+	}
+
+	defer r.Body.Close()
+
+	coll := h.service.deps.DBClient.Database("shortspot").Collection("users")
+	result, err := coll.InsertOne(r.Context(), user)
+	if err != nil {
+		log.Error(r.Context(), "Failed to insert user into database", log.ErrAttr(err))
+		return nil, err
+	}
+
 	return []map[string]interface{}{
-		{"id": "123"},
+		{
+			"message":    "User created successfully",
+			"insertedID": result.InsertedID,
+		},
 	}, nil
 }

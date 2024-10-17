@@ -6,6 +6,7 @@ import (
 	"github.com/vit0rr/short-spot/api/internal/users"
 	"github.com/vit0rr/short-spot/pkg/deps"
 	"github.com/vit0rr/short-spot/pkg/telemetry"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type Router struct {
@@ -13,10 +14,10 @@ type Router struct {
 	users *users.HTTP
 }
 
-func New(deps *deps.Deps) *Router {
+func New(deps *deps.Deps, db mongo.Database) *Router {
 	return &Router{
 		Deps:  deps,
-		users: users.NewHTTP(deps),
+		users: users.NewHTTP(deps, &db),
 	}
 }
 

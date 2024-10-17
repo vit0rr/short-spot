@@ -58,7 +58,7 @@ func main() {
 
 	dependencies := deps.New(cfg, mongoClient)
 
-	httpServer := server.New(ctx, dependencies)
+	httpServer := server.New(ctx, dependencies, mongoClient.Database("shortspot"))
 
 	// Handle graceful shutdown
 	idleConnsClosed := make(chan struct{})

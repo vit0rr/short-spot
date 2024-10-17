@@ -5,21 +5,22 @@ import (
 
 	"github.com/vit0rr/short-spot/pkg/deps"
 	"github.com/vit0rr/short-spot/pkg/log"
+	"go.mongodb.org/mongo-driver/mongo"
 )
 
 type HTTP struct {
 	service *Service
 }
 
-func NewHTTP(deps *deps.Deps) *HTTP {
+func NewHTTP(deps *deps.Deps, db *mongo.Database) *HTTP {
 	return &HTTP{
-		service: NewService(deps),
+		service: NewService(deps, db),
 	}
 }
 
 // GET /users
 func (h *HTTP) List(_ http.ResponseWriter, r *http.Request) (interface{}, error) {
-	users, err := h.service.List(r.Context(), *h.service.deps.DBClient)
+	users, err := h.service.List(r.Context(), *h.service.db.Client())
 	if err != nil {
 		log.Error(r.Context(), "Failed to list users", log.ErrAttr(err))
 		return nil, err

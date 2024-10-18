@@ -5,7 +5,7 @@ import (
 	"encoding/json"
 	"io"
 
-	"github.com/sqids/sqids-go"
+	gonanoid "github.com/matoous/go-nanoid"
 	"github.com/vit0rr/short-spot/pkg/deps"
 	"github.com/vit0rr/short-spot/pkg/log"
 	"go.mongodb.org/mongo-driver/bson"
@@ -31,10 +31,6 @@ func NewService(deps *deps.Deps, db *mongo.Database) *Service {
 
 // Get short URL
 func (s *Service) ShortUrl(c context.Context, b io.ReadCloser, dbclient mongo.Client) (*Response, error) {
-	sq, _ := sqids.New(sqids.Options{
-		MinLength: 10,
-	})
-
 	var body Body
 	err := json.NewDecoder(b).Decode(&body)
 	if err != nil {
@@ -52,7 +48,8 @@ func (s *Service) ShortUrl(c context.Context, b io.ReadCloser, dbclient mongo.Cl
 		}, err
 	}
 
-	id, err := sq.Encode([]uint64{1, 2, 3})
+	id, err := gonanoid.Nanoid(6)
+
 	if err != nil {
 		log.Error(c, "Failed to encode URL", log.ErrAttr(err))
 		return &Response{

@@ -5,8 +5,9 @@ go 1.22.2
 require (
 	github.com/go-chi/chi/v5 v5.1.0
 	github.com/hashicorp/hcl/v2 v2.22.0
+	github.com/joho/godotenv v1.5.1
+	github.com/matoous/go-nanoid v1.5.1
 	github.com/segmentio/ksuid v1.0.4
-	github.com/sqids/sqids-go v0.4.1
 	go.mongodb.org/mongo-driver v1.17.1
 )
 

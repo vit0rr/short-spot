@@ -17,16 +17,15 @@ type Mongo struct {
 }
 
 func GetDefaultAPIConfig() API {
-	err := godotenv.Load()
-	if err != nil {
-		panic("Error loading .env file")
-	}
+	godotenv.Load()
 
 	return API{
 		Mongo: Mongo{
-			Dsn: fmt.Sprintf("mongodb://%s:%s@localhost:27017",
+			Dsn: fmt.Sprintf("mongodb+srv://%s:%s@%s/?retryWrites=true&w=majority&appName=%s",
 				os.Getenv("MONGODB_USER"),
 				os.Getenv("MONGODB_PASS"),
+				os.Getenv("MONGODB_HOST"),
+				os.Getenv("MONGODB_APPNAME"),
 			),
 		},
 	}

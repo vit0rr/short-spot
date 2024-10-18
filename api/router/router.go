@@ -1,6 +1,8 @@
 package router
 
 import (
+	"net/http"
+
 	"github.com/go-chi/chi/v5"
 	"github.com/go-chi/chi/v5/middleware"
 	urlshort "github.com/vit0rr/short-spot/api/internal/url-short"
@@ -21,6 +23,21 @@ func New(deps *deps.Deps, db mongo.Database) *Router {
 	}
 }
 
+func corsMiddleware(next http.Handler) http.Handler {
+	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		w.Header().Set("Access-Control-Allow-Origin", "*")
+		w.Header().Set("Access-Control-Allow-Methods", "POST")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+
+		if r.Method == http.MethodOptions {
+			w.WriteHeader(http.StatusOK)
+			return
+		}
+
+		next.ServeHTTP(w, r)
+	})
+}
+
 func (router *Router) BuildRoutes() *chi.Mux {
 	r := chi.NewRouter()
 	r.Use(middleware.Recoverer)
@@ -28,6 +45,8 @@ func (router *Router) BuildRoutes() *chi.Mux {
 	r.Use(middleware.StripSlashes)
 	r.Use(SetResponseTypeToJSON)
 	r.Use(telemetry.TelemetryMiddleware)
+
+	r.Use(corsMiddleware)
 
 	r.Route("/", func(r chi.Router) {
 		r.Get("/{id}", telemetry.HandleFuncLogger(router.urlshort.Redirect))

@@ -20,10 +20,6 @@ func NewHTTP(deps *deps.Deps, db *mongo.Database) *HTTP {
 
 // POST /short-url
 func (h *HTTP) ShortUrl(w http.ResponseWriter, r *http.Request) (interface{}, error) {
-	w.Header().Set("Content-Type", "application/json")
-	w.Header().Set("Access-Control-Allow-Origin", "*")
-	w.Header().Set("Access-Control-Allow-Methods", "POST")
-
 	url, err := h.service.ShortUrl(r.Context(), r.Body, *h.service.db.Client())
 	if err != nil {
 		log.Error(r.Context(), "Failed to create short URL", log.ErrAttr(err))

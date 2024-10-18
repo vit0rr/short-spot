@@ -18,6 +18,7 @@ require (
 	github.com/klauspost/compress v1.13.6 // indirect
 	github.com/mitchellh/go-wordwrap v0.0.0-20150314170334-ad45545899c7 // indirect
 	github.com/montanaflynn/stats v0.7.1 // indirect
+	github.com/sqids/sqids-go v0.4.1 // indirect
 	github.com/xdg-go/pbkdf2 v1.0.0 // indirect
 	github.com/xdg-go/scram v1.1.2 // indirect
 	github.com/xdg-go/stringprep v1.0.4 // indirect

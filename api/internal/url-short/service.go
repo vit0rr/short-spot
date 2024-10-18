@@ -4,7 +4,9 @@ import (
 	"context"
 	"encoding/json"
 	"io"
+	"os"
 
+	"github.com/joho/godotenv"
 	gonanoid "github.com/matoous/go-nanoid"
 	"github.com/vit0rr/short-spot/pkg/deps"
 	"github.com/vit0rr/short-spot/pkg/log"
@@ -31,6 +33,9 @@ func NewService(deps *deps.Deps, db *mongo.Database) *Service {
 
 // Get short URL
 func (s *Service) ShortUrl(c context.Context, b io.ReadCloser, dbclient mongo.Client) (*Response, error) {
+
+	godotenv.Load()
+
 	var body Body
 	err := json.NewDecoder(b).Decode(&body)
 	if err != nil {
@@ -57,7 +62,7 @@ func (s *Service) ShortUrl(c context.Context, b io.ReadCloser, dbclient mongo.Cl
 		}, err
 	}
 
-	shortenedUrl := "http://localhost:8080/" + id
+	shortenedUrl := os.Getenv("BASE_URL") + id
 
 	coll := dbclient.Database("shortspot").Collection("shorturls")
 	_, err = coll.InsertOne(c, Urls{

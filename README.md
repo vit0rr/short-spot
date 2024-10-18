@@ -5,8 +5,8 @@ Short Spot is a URL shortening service that allows users to shorten long URLs in
 ## Features
 
 #### Backend
-- Shorten long URLs into short links:
-- Redirect short links to the original URLs:
+- Shorten long URLs into short links
+- Redirect short links to the original URLs
 
 ## How to run
 ```bash

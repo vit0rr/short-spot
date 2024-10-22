@@ -9,6 +9,7 @@ import (
 	"github.com/joho/godotenv"
 	urlshort "github.com/vit0rr/short-spot/api/internal/url-short"
 	"github.com/vit0rr/short-spot/pkg/deps"
+	"github.com/vit0rr/short-spot/pkg/log"
 	"github.com/vit0rr/short-spot/pkg/telemetry"
 	"go.mongodb.org/mongo-driver/mongo"
 )
@@ -52,7 +53,7 @@ func corsMiddleware(next http.Handler) http.Handler {
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
 		w.Header().Set("Access-Control-Allow-Origin", "*")
 		w.Header().Set("Access-Control-Allow-Methods", "POST")
-		w.Header().Set("Access-Control-Allow-Headers", "Content-Type")
+		w.Header().Set("Access-Control-Allow-Headers", "Content-Type, Authorization, X-Requested-With")
 
 		if r.Method == http.MethodOptions {
 			w.WriteHeader(http.StatusOK)
@@ -67,8 +68,14 @@ func authMiddleware(next http.Handler) http.Handler {
 	godotenv.Load()
 
 	return http.HandlerFunc(func(w http.ResponseWriter, r *http.Request) {
+		if r.Method == http.MethodGet {
+			next.ServeHTTP(w, r)
+			return
+		}
+
 		token := r.Header.Get("Authorization")
 		if token != os.Getenv("AUTH_TOKEN") {
+			log.Error(r.Context(), "Unauthorized. Please provide a valid auth token")
 			http.Error(w, "Unauthorized. Please provide a valid auth token", http.StatusUnauthorized)
 			return
 		}

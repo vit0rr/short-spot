@@ -10,6 +10,7 @@ import (
 	"os/signal"
 
 	"github.com/vit0rr/short-spot/api/server"
+	_ "github.com/vit0rr/short-spot/cmd/api/docs"
 	"github.com/vit0rr/short-spot/config"
 	"github.com/vit0rr/short-spot/pkg/deps"
 	"github.com/vit0rr/short-spot/pkg/log"
@@ -17,6 +18,25 @@ import (
 	"go.mongodb.org/mongo-driver/mongo/options"
 )
 
+//	@title			Short Spot API
+//	@version		1.0
+//	@description	Short Spot API is a simple URL shortener service
+//	@termsOfService	http://swagger.io/terms/
+
+//	@contact.name	API Support
+//	@contact.url	http://www.swagger.io/support
+//	@contact.email	support@swagger.io
+
+//	@license.name	Apache 2.0
+//	@license.url	http://www.apache.org/licenses/LICENSE-2.0.html
+
+//	@host		localhost:8080
+//	@BasePath	/api/v1
+
+//	@securityDefinitions.basic	BasicAuth
+
+// @externalDocs.description	OpenAPI
+// @externalDocs.url			https://swagger.io/resources/open-api/
 func main() {
 	ctx := context.Background()
 	// Parse config file location from command-line flag
